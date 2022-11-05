@@ -22,23 +22,28 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
       input [15:0] data;
 
       begin
+	 $timeformat(-9, 2, " ns", 20);
+
 	 if(clk_phase == 1) begin
 	    @(change_ev);
 	 end
 
 	 // Output MSB
 	 miso_r <= data[$bits(data)-1];
+	 // $display("%t: SPI Slave - Write Initial Bit - '%b'", $time, data[$bits(data)-1]);
+	 #1;
 
-	 // Output the rest of the data on the MISO line
+
+	 // Output the rest of the data on the MISO_R line
 	 for(int x=$bits(data)-2; x>=0; x--) begin
 	    @(change_ev);
+	    // $display("%t: SPI Slave - Write Bit - '%b'", $time, data[x]);
 	    // Output bit
 	    miso_r <= data[x];
 	 end
+	 @(change_ev);
 
-	 $timeformat(-9, 2, " ns", 20);
 	 $display("%t: SPI Slave - Write Data - '%x'", $time, data);
-
       end
    endtask
 
@@ -49,18 +54,28 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
       output [15:0] data;
 
       begin
+	 $timeformat(-9, 2, " ns", 20);
+
+	 // Avoid issue with calling at beginning of the tb
+	 #1;
+
 	 if(clk_phase == 1) begin
 	    @(change_ev);
 	 end
 
+	 @(sample_ev);
+	 data <= {data[$bits(data)-2:0], mosi};
+
 	 // Output the rest of the data on the MOSI line
-	 for(int x=0; x<$bits(data); x++) begin
+	 for(int x=0; x<$bits(data)-1; x++) begin
 	    @(sample_ev);
 	    // Read bit
 	    data <= {data[$bits(data)-2:0], mosi};
 	 end
 
-	 $timeformat(-9, 2, " ns", 20);
+	 // Wait 1 step for data to update before returning
+	 #1;
+
 	 $display("%t: SPI Slave - Read Data - '%x'", $time, data);
       end
    endtask
@@ -117,7 +132,7 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
    initial begin
       forever begin
 	 fork
-	    write_data(16'hBABE);
+	    write_data(16'h5A5A);
 	    read_data(rd_data);
 	 join
       end

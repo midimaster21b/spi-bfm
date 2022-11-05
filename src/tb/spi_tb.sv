@@ -8,8 +8,8 @@ module spi_tb;
    wire		 ss;
 
    // Read output
-   logic [15:0] wr_data = 16'h74;
-   logic [15:0] rd_data = 16'h35;
+   logic [15:0] wr_data = 16'hA5A5;
+   logic [15:0] rd_data;
 
 
    initial begin

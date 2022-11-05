@@ -44,21 +44,27 @@ module spi_master_bfm(sclk, mosi, miso, ss);
       input [15:0] data;
 
       begin
+	 $timeformat(-9, 2, " ns", 20);
+
 	 if(clk_phase == 1) begin
 	    @(change_ev);
 	 end
 
 	 // Output MSB
 	 mosi <= data[$bits(data)-1];
+	 // $display("%t: SPI Master - Write Initial Bit - '%b'", $time, data[$bits(data)-1]);
+	 #1;
+
 
 	 // Output the rest of the data on the MOSI line
 	 for(int x=$bits(data)-2; x>=0; x--) begin
 	    @(change_ev);
+	    // $display("%t: SPI Master - Write Bit - '%b'", $time, data[x]);
 	    // Output bit
 	    mosi <= data[x];
 	 end
+	 @(change_ev);
 
-	 $timeformat(-9, 2, " ns", 20);
 	 $display("%t: SPI Master - Write Data - '%x'", $time, data);
       end
    endtask
@@ -70,21 +76,52 @@ module spi_master_bfm(sclk, mosi, miso, ss);
       output [15:0] data;
 
       begin
+	 $timeformat(-9, 2, " ns", 20);
+
+	 // Avoid issue with calling at beginning of the tb
+	 #1;
+
 	 if(clk_phase == 1) begin
 	    @(change_ev);
 	 end
 
-	 // Output the rest of the data on the MOSI line
-	 for(int x=0; x<$bits(data); x++) begin
+	 @(sample_ev);
+	 data <= {data[$bits(data)-2:0], miso};
+
+	 // Output the rest of the data on the MISO line
+	 for(int x=0; x<$bits(data)-1; x++) begin
 	    @(sample_ev);
 	    // Read bit
 	    data <= {data[$bits(data)-2:0], miso};
 	 end
 
-	 $timeformat(-9, 2, " ns", 20);
+	 // Wait 1 step for data to update before returning
+	 #1;
+
 	 $display("%t: SPI Master - Read Data - '%x'", $time, data);
       end
    endtask
+
+
+   // task read_data;
+   //    output [15:0] data;
+
+   //    begin
+   //	 if(clk_phase == 1) begin
+   //	    @(change_ev);
+   //	 end
+
+   //	 // Output the rest of the data on the MOSI line
+   //	 for(int x=0; x<$bits(data); x++) begin
+   //	    @(sample_ev);
+   //	    // Read bit
+   //	    data <= {data[$bits(data)-2:0], miso};
+   //	 end
+
+   //	 $timeformat(-9, 2, " ns", 20);
+   //	 $display("%t: SPI Master - Read Data - '%x'", $time, data);
+   //    end
+   // endtask
 
 
    task clk_n_ctrl;
