@@ -11,8 +11,10 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
    event	 change_ev;
 
    logic	 miso_r;
+   logic [15:0]  rd_data;
 
    assign miso = (ss == '1) ? 'Z : miso_r;
+
 
    // Write output data onto the MISO
    // TODO: Allow variable bit width data to be supplied
@@ -33,6 +35,10 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 	    // Output bit
 	    miso_r <= data[x];
 	 end
+
+	 $timeformat(-9, 2, " ns", 20);
+	 $display("%t: SPI Slave - Write Data - '%x'", $time, data);
+
       end
    endtask
 
@@ -51,8 +57,11 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 	 for(int x=0; x<$bits(data); x++) begin
 	    @(sample_ev);
 	    // Read bit
-	    data <= {data[$bits(data)-2:0], MOSI};
+	    data <= {data[$bits(data)-2:0], mosi};
 	 end
+
+	 $timeformat(-9, 2, " ns", 20);
+	 $display("%t: SPI Slave - Read Data - '%x'", $time, data);
       end
    endtask
 
@@ -103,4 +112,16 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 	 end
       end
    end
+
+
+   initial begin
+      forever begin
+	 fork
+	    write_data(16'hBABE);
+	    read_data(rd_data);
+	 join
+      end
+   end
+
+
 endmodule // spi_slave_bfm

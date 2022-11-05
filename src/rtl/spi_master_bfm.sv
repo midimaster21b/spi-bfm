@@ -16,7 +16,26 @@ module spi_master_bfm(sclk, mosi, miso, ss);
    logic	 int_clk = '0;
 
 
-   always int_clk <= #(period/2) ~int_clk;
+   initial begin
+      forever begin
+	 #(period/2) int_clk = ~int_clk;
+      end
+   end
+
+
+   task m_write_data;
+      input  [15:0] wr_data;
+      output [15:0] rd_data;
+
+      begin
+	 fork
+	    clk_n_ctrl(16);
+	    write_data(wr_data);
+	    read_data(rd_data);
+	 join
+      end
+   endtask // m_write_data
+
 
 
    // Write output data onto the MOSI
@@ -38,6 +57,9 @@ module spi_master_bfm(sclk, mosi, miso, ss);
 	    // Output bit
 	    mosi <= data[x];
 	 end
+
+	 $timeformat(-9, 2, " ns", 20);
+	 $display("%t: SPI Master - Write Data - '%x'", $time, data);
       end
    endtask
 
@@ -56,14 +78,17 @@ module spi_master_bfm(sclk, mosi, miso, ss);
 	 for(int x=0; x<$bits(data); x++) begin
 	    @(sample_ev);
 	    // Read bit
-	    data <= {data[$bits(data)-2:0], MISO};
+	    data <= {data[$bits(data)-2:0], miso};
 	 end
+
+	 $timeformat(-9, 2, " ns", 20);
+	 $display("%t: SPI Master - Read Data - '%x'", $time, data);
       end
    endtask
 
 
-   task clock_n_ctrl;
-      int num_data_bits;
+   task clk_n_ctrl;
+      input int num_data_bits;
 
       begin
 	 @(posedge int_clk);
