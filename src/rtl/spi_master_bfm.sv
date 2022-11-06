@@ -56,8 +56,8 @@ module spi_master_bfm(sclk, mosi, miso, ss);
 
 	 // Output MSB
 	 mosi <= data[$bits(data)-1];
-	 // $display("%t: SPI Master - Write Initial Bit - '%b'", $time, data[$bits(data)-1]);
-	 #1;
+	 // // $display("%t: SPI Master - Write Initial Bit - '%b'", $time, data[$bits(data)-1]);
+	 // #1;
 
 
 	 // Output the rest of the data on the MOSI line
@@ -67,7 +67,7 @@ module spi_master_bfm(sclk, mosi, miso, ss);
 	    // Output bit
 	    mosi <= data[x];
 	 end
-	 @(change_ev);
+	 // @(change_ev);
 
 	 wait(ss == '1);
       end
@@ -83,8 +83,6 @@ module spi_master_bfm(sclk, mosi, miso, ss);
 	 $timeformat(-9, 2, " ns", 20);
 
 	 wait(ss == '0);
-	 // Avoid issue with calling at beginning of the tb
-	 #1;
 
 	 if(clk_phase == 1) begin
 	    @(change_ev);
@@ -100,7 +98,7 @@ module spi_master_bfm(sclk, mosi, miso, ss);
 	    data <= {data[$bits(data)-2:0], miso};
 	 end
 
-	 // Wait 1 step for data to update before returning
+	 // Guarantee 1 step for data to update before returning
 	 #1;
 
 	 $display("%t: SPI Master - Read Data - '%x'", $time, data);

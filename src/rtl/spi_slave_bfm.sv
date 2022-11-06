@@ -79,7 +79,7 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 	    data <= {data[$bits(data)-2:0], mosi};
 	 end
 
-	 // Wait 1 step for data to update before returning
+	 // Guarantee 1 step for data to update before returning
 	 #1;
 
 	 $display("%t: SPI Slave - Read Data - '%x'", $time, data);
