@@ -24,9 +24,13 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
       begin
 	 $timeformat(-9, 2, " ns", 20);
 
+	 wait(ss == '0);
+
 	 if(clk_phase == 1) begin
 	    @(change_ev);
 	 end
+
+	 $display("%t: SPI Slave - Write Data - '%x'", $time, data);
 
 	 // Output MSB
 	 miso_r <= data[$bits(data)-1];
@@ -43,7 +47,7 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 	 end
 	 @(change_ev);
 
-	 $display("%t: SPI Slave - Write Data - '%x'", $time, data);
+	 wait(ss == '1);
       end
    endtask
 
@@ -55,6 +59,8 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 
       begin
 	 $timeformat(-9, 2, " ns", 20);
+
+	 wait(ss == '0);
 
 	 // Avoid issue with calling at beginning of the tb
 	 #1;
@@ -77,6 +83,8 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 	 #1;
 
 	 $display("%t: SPI Slave - Read Data - '%x'", $time, data);
+
+	 wait(ss == '1);
       end
    endtask
 

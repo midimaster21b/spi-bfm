@@ -46,9 +46,13 @@ module spi_master_bfm(sclk, mosi, miso, ss);
       begin
 	 $timeformat(-9, 2, " ns", 20);
 
+	 wait(ss == '0);
+
 	 if(clk_phase == 1) begin
 	    @(change_ev);
 	 end
+
+	 $display("%t: SPI Master - Write Data - '%x'", $time, data);
 
 	 // Output MSB
 	 mosi <= data[$bits(data)-1];
@@ -65,7 +69,7 @@ module spi_master_bfm(sclk, mosi, miso, ss);
 	 end
 	 @(change_ev);
 
-	 $display("%t: SPI Master - Write Data - '%x'", $time, data);
+	 wait(ss == '1);
       end
    endtask
 
@@ -78,6 +82,7 @@ module spi_master_bfm(sclk, mosi, miso, ss);
       begin
 	 $timeformat(-9, 2, " ns", 20);
 
+	 wait(ss == '0);
 	 // Avoid issue with calling at beginning of the tb
 	 #1;
 
@@ -99,6 +104,8 @@ module spi_master_bfm(sclk, mosi, miso, ss);
 	 #1;
 
 	 $display("%t: SPI Master - Read Data - '%x'", $time, data);
+
+	 wait(ss == '1);
       end
    endtask
 

@@ -37,5 +37,5 @@ module spi_tb;
 
    // DUTs
    spi_master_bfm #(.clk_polarity(0), .clk_phase(0), .clk_freq(clk_rate)) dut_master(.sclk(sclk), .mosi(mosi), .miso(miso), .ss(ss));
-   spi_slave_bfm #(.clk_polarity(0), .clk_phase(0), .clk_freq(clk_rate)) dut_slave(.sclk(sclk), .mosi(mosi), .miso(miso), .ss(ss));
+   spi_slave_bfm #(.clk_polarity(0), .clk_phase(0)) dut_slave(.sclk(sclk), .mosi(mosi), .miso(miso), .ss(ss));
 endmodule // spi_tb
