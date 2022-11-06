@@ -15,8 +15,8 @@ module spi_tb;
    initial begin
       // Writes
       dut_master.m_write_data(.wr_data(wr_data), .rd_data(rd_data));
-
       repeat(10) #(period);
+      dut_master.m_write_data(.wr_data(16'hABCD), .rd_data(rd_data));
 
       $display("============================");
       $display("======= TEST PASSED! =======");
