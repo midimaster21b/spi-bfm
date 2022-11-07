@@ -72,17 +72,23 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 	 @(sample_ev);
 	 data <= {data[$bits(data)-2:0], mosi};
 
-	 // Output the rest of the data on the MOSI line
-	 for(int x=0; x<$bits(data)-1; x++) begin
-	    @(sample_ev);
-	    // Read bit
-	    data <= {data[$bits(data)-2:0], mosi};
+	 while(ss == '0) begin
+	    // Output the rest of the data on the MOSI line
+	    for(int x=0; x<8; x++) begin
+	       @(sample_ev or ss);
+	       if(ss == '1) begin
+		  break;
+	       end
+
+	       // Read bit
+	       data <= {data[$bits(data)-2:0], mosi};
+	    end
+
+	    $display("%t: SPI Slave - Read Byte - '%x'", $time, data[7:0]);
 	 end
 
 	 // Guarantee 1 step for data to update before returning
 	 #1;
-
-	 $display("%t: SPI Slave - Read Data - '%x'", $time, data);
 
 	 wait(ss == '1);
       end
