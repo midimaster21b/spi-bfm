@@ -6,25 +6,34 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 
    parameter int clk_polarity;
    parameter int clk_phase;
+   parameter logic [7:0] default_byte = 8'hA5;
 
    event	 sample_ev;
    event	 change_ev;
 
    logic	 miso_r;
    logic [15:0]  rd_data;
+   logic [7:0]	 miso_byte;
+
+   typedef mailbox #(logic [7:0]) spi_inbox_t;
+   spi_inbox_t spi_mosi_inbox = new();
+   spi_inbox_t spi_miso_inbox = new();
 
    assign miso = (ss == '1) ? 'Z : miso_r;
 
 
-   // Write output data onto the MISO
-   // TODO: Allow variable bit width data to be supplied
-   task write_data;
-      input [15:0] data;
+   /**************************************************************************
+    * Write output data onto the MISO
+    * TODO: Allow variable bit width data to be supplied
+    **************************************************************************/
+   task tx_miso_byte;
+      input [7:0] data;
 
       begin
 	 $timeformat(-9, 2, " ns", 20);
+	 $display("%t: SPI Slave - Write Data [Start]", $time);
 
-	 wait(ss == '0);
+	 // wait(ss == '0);
 
 	 if(clk_phase == 1) begin
 	    @(change_ev);
@@ -47,15 +56,17 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 	 end
 	 @(change_ev);
 
-	 wait(ss == '1);
+	 $display("%t: SPI Slave - Write Data [DONE]", $time);
       end
    endtask
 
 
-   // Read data from the MOSI
-   // TODO: Allow variable bit width data to be supplied
-   task read_data;
-      output [15:0] data;
+   /**************************************************************************
+    * Read data from the MOSI
+    * TODO: Allow variable bit width data to be supplied
+    **************************************************************************/
+   task rx_mosi_byte;
+      logic [7:0] temp_byte = '0;
 
       begin
 	 $timeformat(-9, 2, " ns", 20);
@@ -70,7 +81,7 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 	 end
 
 	 @(sample_ev);
-	 data <= {data[$bits(data)-2:0], mosi};
+	 temp_byte <= {temp_byte[$bits(temp_byte)-2:0], mosi};
 
 	 while(ss == '0) begin
 	    // Output the rest of the data on the MOSI line
@@ -81,21 +92,53 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 	       end
 
 	       // Read bit
-	       data <= {data[$bits(data)-2:0], mosi};
+	       temp_byte <= {temp_byte[$bits(temp_byte)-2:0], mosi};
 	    end
 
-	    $display("%t: SPI Slave - Read Byte - '%x'", $time, data[7:0]);
+	    spi_mosi_inbox.put(temp_byte);
+	    $display("%t: SPI Slave - Read Byte - '%x'", $time, temp_byte[7:0]);
 	 end
 
 	 // Guarantee 1 step for data to update before returning
 	 #1;
 
-	 wait(ss == '1);
+	 // wait(ss == '1);
       end
-   endtask
+   endtask // rx_mosi_byte
 
 
-   // Sample event
+   /**************************************************************************
+    * Read the latest MOSI byte from the mailbox and return it. [BLOCKING]
+    **************************************************************************/
+   task get_mosi_byte;
+      output logic [7:0] temp_byte;
+
+      begin
+	 spi_mosi_inbox.get(temp_byte);
+
+      end
+   endtask // get_mosi_byte
+
+
+   /**************************************************************************
+    * Put the supplied byte into the MISO byte mailbox.
+    **************************************************************************/
+   task put_miso_byte;
+      input logic [7:0] temp_byte;
+
+      begin
+	 spi_miso_inbox.put(temp_byte);
+
+      end
+   endtask // put_miso_byte
+
+
+   /**************************************************************************
+    * Sample event
+    *
+    * This block is responsible for triggering the sample event at the
+    * appropriate clock edge.
+    **************************************************************************/
    initial begin
       forever begin
 	 if(clk_phase == 0) begin
@@ -119,7 +162,12 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
    end
 
 
-   // Data change event
+   /**************************************************************************
+    * Data change event
+    *
+    * This block is responsible for triggering the data event at the
+    * appropriate clock edge.
+    **************************************************************************/
    initial begin
       forever begin
 	 if(clk_phase == 0) begin
@@ -143,14 +191,30 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
    end
 
 
+   /**************************************************************************
+    * Main MOSI BFM operation
+    **************************************************************************/
    initial begin
       forever begin
-	 fork
-	    write_data(16'h5A5A);
-	    read_data(rd_data);
-	 join
+	 rx_mosi_byte();
       end
    end
 
 
+   /**************************************************************************
+    * Main MISO BFM operation
+    **************************************************************************/
+   initial begin
+      wait(ss == '0);
+
+      forever begin
+	 if(spi_miso_inbox.try_get(miso_byte) != 0) begin
+	    tx_miso_byte(miso_byte);
+
+	 end else begin
+	    tx_miso_byte(default_byte);
+
+	 end
+      end
+   end
 endmodule // spi_slave_bfm
