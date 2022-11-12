@@ -31,9 +31,6 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 
       begin
 	 $timeformat(-9, 2, " ns", 20);
-	 $display("%t: SPI Slave - Write Data [Start]", $time);
-
-	 // wait(ss == '0);
 
 	 if(clk_phase == 1) begin
 	    @(change_ev);
@@ -43,20 +40,16 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 
 	 // Output MSB
 	 miso_r <= data[$bits(data)-1];
-	 // $display("%t: SPI Slave - Write Initial Bit - '%b'", $time, data[$bits(data)-1]);
 	 #1;
 
 
 	 // Output the rest of the data on the MISO_R line
 	 for(int x=$bits(data)-2; x>=0; x--) begin
 	    @(change_ev);
-	    // $display("%t: SPI Slave - Write Bit - '%b'", $time, data[x]);
 	    // Output bit
 	    miso_r <= data[x];
 	 end
 	 @(change_ev);
-
-	 $display("%t: SPI Slave - Write Data [DONE]", $time);
       end
    endtask
 
@@ -101,8 +94,6 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
 
 	 // Guarantee 1 step for data to update before returning
 	 #1;
-
-	 // wait(ss == '1);
       end
    endtask // rx_mosi_byte
 
