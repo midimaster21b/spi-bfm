@@ -1,5 +1,5 @@
 CAPI=2:
-name: midimaster21b:bfm:spi:0.1.0
+name: midimaster21b:bfm:spi:0.1.1
 description: A basic SPI BFM
 
 filesets:

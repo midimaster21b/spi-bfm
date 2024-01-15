@@ -36,15 +36,6 @@ Vivado is used for the default simulator for this repository. Other simulators c
 
 Expected output:
 ```
-WARNING: Parse error. Ignoring file /home/midimaster21b/.local/share/fusesoc/midi-cores/comm/spi-master/spi_master_v0.1.0.core:
-Error validating data.targets.default.parameters[0] must be string
-WARNING: Parse error. Ignoring file /home/midimaster21b/.local/share/fusesoc/midi-cores/dsp/AD9467.core:
-Error validating data.filesets.pkg.files[0] must be valid exactly by one definition (0 matches found)
-WARNING: Parse error. Ignoring file /home/midimaster21b/.local/share/fusesoc/midi-cores/prim/ddr/ddr_v0.1.1.core:
-Error validating data.parameters.TARGET.datatype must match pattern ^bool|file|int|real|str$
-WARNING: Parse error. Ignoring file /home/midimaster21b/.local/share/fusesoc/midi-cores/prim/ddr/ddr_v0.1.0.core:
-Error validating data.parameters.TARGET.datatype must match pattern ^bool|file|int|real|str$
-WARNING: Replacing midimaster21b:bfm:spi:0.1.0 in /home/midimaster21b/.local/share/fusesoc/midi-cores/bfm with the version found in .
 INFO: Preparing midimaster21b:bfm:spi:0.1.0
 INFO: Setting up project
 INFO: Building

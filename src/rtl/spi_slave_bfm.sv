@@ -59,7 +59,7 @@ module spi_slave_bfm(sclk, mosi, miso, ss);
     * TODO: Allow variable bit width data to be supplied
     **************************************************************************/
    task rx_mosi_byte;
-      logic [7:0] temp_byte = '0;
+      static logic [7:0] temp_byte = '0;
 
       begin
 	 $timeformat(-9, 2, " ns", 20);
