@@ -2,19 +2,20 @@
 
 Simple SPI master and SPI slave bus functional models(BFMs).
 
+
 ## Tool Requirements
 
 ### [asdf](https://asdf-vm.com/guide/getting-started.html)
 
 This repository uses [asdf](https://asdf-vm.com/guide/getting-started.html) for tool version management. If you do not wish to use [asdf](https://asdf-vm.com/guide/getting-started.html) or do not have it available, open the file `.tool-versions` in this directory to see a list of tools and their associated versions required to run this core locally.
 
-### FuseSoC
+### [FuseSoC](https://github.com/olofk/fusesoc)
 
-Once you have python installed, use pip
+Once you have python installed, use pip to install FuseSoC and other requirements.
 
-### Vivado
+### [Vivado](https://www.xilinx.com/support/download.html)
 
-Vivado is used for the default simulator for this repository. Other simulators can be used with FuseSoC's
+Vivado is used for the default simulator for this repository. Other simulators can be used with FuseSoC's `--tool` flag.
 
 
 ## How to use
@@ -24,9 +25,9 @@ Vivado is used for the default simulator for this repository. Other simulators c
 `asdf install`
 
 
-2. Use python's pip to install fusesoc
+2. Use python's pip to install [FuseSoC](https://github.com/olofk/fusesoc) and other requirements.
 
-`pip install fusesoc`
+`pip install -r requirements.txt`
 
 
 3. Run the core locally
